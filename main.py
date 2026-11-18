@@ -16,10 +16,15 @@ the forecast sharper than a plain average shape:
 2. Launch size: bigger hour-1 prints go with flatter days (log peak/hour-1
    falls about 0.5 per log unit of hour-1 print across past launches,
    corr about -0.83). Each hour's log-ratio mean is regressed on log
-   hour-1 print, the slope shrunk halfway toward a pooled slope over all
-   hours, and the effective log print is capped half a log unit above the
-   largest comparable, so an unprecedented launch does not extrapolate
-   without bound.
+   hour-1 print using that hour's own slope: the size effect is strongest
+   at the evening peak hours (per-hour R^2 about 0.65-0.72 at hours 19-22,
+   slope about -0.55), while overnight hours show almost none, so shrinking
+   each hour's slope toward a pooled average over all hours would halve
+   exactly the signal that matters. Slopes are clipped to [-1, 0] and the
+   effective log print is capped half a log unit above the largest
+   comparable, so an unprecedented launch does not extrapolate without
+   bound. (A pooled slope is still used only for hours with too little
+   data to fit their own.)
 
 Launches whose hour-1 print is tiny (under 10,000) are left out of the
 training set: those are mostly games whose real unlock came later in the
@@ -188,7 +193,11 @@ def fit_group(p1, group):
             slope_h = (sum((a - mx2) * (b - my2) for a, b in pts)
                        / len(pts) / vx2)
         slope_h = max(SLOPE_MIN, min(0.0, slope_h))
-        slope = 0.5 * slope_h + 0.5 * pooled
+        # Use the hour's own slope as-is. The size effect lives in the
+        # evening peak hours (R^2 ~0.65-0.72 at hours 19-22) and is near
+        # zero overnight, so averaging it with a pooled slope would dilute
+        # the one place it matters. The clip to [-1, 0] bounds the fit.
+        slope = slope_h
         mu = my2 + slope * (lp_eff - mx2)
         resid = [b - (my2 + slope * (a - mx2)) for a, b in pts]
         sd = max(pstdev(resid) if len(resid) > 1 else 0.3, SIGMA_FLOOR)

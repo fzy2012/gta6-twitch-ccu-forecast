@@ -13,7 +13,7 @@ launches the case carries as comparables, and writes one forecast file per
 case. The shape is the empirical distribution of each later hour's viewers
 relative to hour 1's print, in log space, fitted as a lognormal per hour,
 with two pieces of conditioning that beat a plain average shape on
-leave-one-out tests over 18 past launches (mean pinball loss 0.28 vs 0.39
+leave-one-out tests over 18 past launches (mean pinball loss 0.27 vs 0.39
 for the persistence baseline):
 
 - **Surge ratio.** Hour 1's print divided by the median hourly viewers in
@@ -25,9 +25,10 @@ for the persistence baseline):
 - **Launch size.** Bigger hour-1 prints go with flatter days (log
   peak/hour-1 falls about 0.5 per log unit of hour-1 print across past
   launches, correlation about -0.83). Each hour's log-ratio mean is
-  regressed on log hour-1 print, the slope shrunk halfway toward a pooled
-  slope, and the effective log print capped half a log unit above the
-  largest comparable.
+  regressed on log hour-1 print using that hour's own slope — the size
+  effect is strongest at the evening peak (per-hour R² about 0.65–0.72 at
+  hours 19–22), so no shrinkage toward a pooled slope — and the effective
+  log print capped half a log unit above the largest comparable.
 
 Launches whose hour-1 print is under 10,000 are left out of training:
 those are mostly games whose real unlock came later in the day, so their
